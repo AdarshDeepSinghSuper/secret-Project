@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Just 2 Minutes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Great Vibes', cursive;
+            background-color: #ffeef8;
+            animation: fadeIn 2s ease;
+            overflow-x: hidden;
+            /* allow vertical scrolling */
+        }
+
+        #tsparticles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .love-bg {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(255, 192, 203, 0.5);
+        }
+
+        .sketch {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #4b4b4b;
+        }
+
+        .button-play {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 1em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.2);
+            font-weight: bold;
+        }
+
+        .yes {
+            background-color: #ff85b3;
+            color: white;
+        }
+
+        .yes:hover {
+            background-color: #ff6fa5;
+            transform: scale(1.05);
+        }
+
+        .no {
+            background-color: #ffd1dc;
+            color: #333;
+            position: relative;
+        }
+
+        .no:hover {
+            background-color: #ffb6c1;
+            transform: scale(1.05);
+        }
+
+        .spin-fast {
+            animation: spin 0.3s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                font-size: 1.3em;
+            }
+
+            .btn {
+                width: 80%;
+                font-size: 1.1em;
+            }
+        }
+
+        .drone-container {
+            position: fixed;
+            top: 50px;
+            left: 50px;
+            z-index: 10;
+            transition: top 0.8s ease, left 0.8s ease;
+        }
+
+        #drone-container,
+        #drone-container-1,
+        #drone-container-2 {
+            position: absolute;
+            transition: top 1s ease-in-out, left 1s ease-in-out;
+        }
+
+
+
+        .drone {
+            width: 100px;
+            height: auto;
+        }
+
+        @keyframes flyAcross {
+            0% {
+                left: -100px;
+                top: 50px;
+            }
+
+            50% {
+                left: 50%;
+                top: 100px;
+            }
+
+            100% {
+                left: 110%;
+                top: 50px;
+            }
+        }
+
+        .flower {
+            position: absolute;
+            width: 50px;
+            /* increased from 30px */
+            height: auto;
+            pointer-events: none;
+            animation: fall 5s linear forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+
+<body class="love-bg">
+    <div id="drone-container-1" class="drone-container">
+        <img src="drone.png" alt="Flying Drone" class="drone" />
+    </div>
+    <div id="drone-container-2" class="drone-container">
+        <img src="drone.png" alt="Flying Drone" class="drone" />
+    </div>
+
+
+    <div id="tsparticles"></div>
+    <audio id="bgmusic" loop>
+        <source src="music.mp3" type="audio/mp3" />
+    </audio>
+    <!-- <button onclick="document.getElementById('bgmusic').play()" style="margin-top: 10px;">🎵 Play Music</button> -->
+
+    <div class="container sketch-container">
+        <img src="img.png" alt="Her Sketch" class="sketch" />
+        <p class="message" id="typed"></p>
+        <div class="button-play">
+            <button class="btn yes" onclick="openWhatsApp()">Sure......</button>
+            <button class="btn no" onclick="crazyMove()">Nope</button>
+        </div>
+    </div>
+
+    <script>
+        const text = "All I ask is a moment of your time — just 2 minutes, that’s it. 💫 ";
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                document.getElementById("typed").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, 60);
+            }
+        }
+        type();
+
+        function openWhatsApp() {
+            window.open("https://wa.me", "_blank");
+        }
+
+        function crazyMove() {
+            const btn = document.querySelector('.no');
+            if (!btn) return;
+            btn.classList.add('spin-fast');
+            let count = 0;
+            const interval = setInterval(() => {
+                btn.style.position = 'absolute';
+                btn.style.top = Math.random() * 80 + "%";
+                btn.style.left = Math.random() * 80 + "%";
+                count++;
+                if (count > 20) {
+                    clearInterval(interval);
+                    btn.classList.remove('spin-fast');
+                }
+            }, 100);
+        }
+
+        setTimeout(() => {
+            alert("Still here? That means a lot 💖");
+        }, 10000);
+
+        tsParticles.load("tsparticles", {
+            fullScreen: { enable: true },
+            particles: {
+                number: { value: 25 },
+                shape: {
+                    type: "image",
+                    image: [
+                        { src: "https://cdn-icons-png.flaticon.com/128/1828/1828884.png", width: 20, height: 20 }
+                    ]
+                },
+                size: { value: 24 },
+                move: { enable: true, speed: 1 },
+                opacity: { value: 0.6 }
+            }
+        });
+
+        // Heart trail
+        document.addEventListener('mousemove', function (e) {
+            const flower = document.createElement('div');
+            flower.textContent = '🌸';
+            flower.style.position = 'absolute';
+            flower.style.left = (e.pageX - 10) + 'px';
+            flower.style.top = (e.pageY - 10) + 'px';
+            flower.style.pointerEvents = 'none';
+            flower.style.fontSize = '20px';
+            flower.style.animation = 'fadeOut 1s forwards';
+            document.body.appendChild(flower);
+            setTimeout(() => flower.remove(), 1000);
+        });
+
+
+        // Drone + flower
+        const drone = document.getElementById('drone-container');
+
+        function dropFlower() {
+            const flower = document.createElement('img');
+            flower.src = 'flower.png';
+            flower.classList.add('flower');
+            flower.style.left = (drone.offsetLeft + 50) + 'px';
+            flower.style.top = (drone.offsetTop + 50) + 'px';
+            document.body.appendChild(flower);
+
+            setTimeout(() => {
+                flower.remove();
+            }, 5000);
+        }
+
+        function moveDroneRandomly() {
+            const maxWidth = window.innerWidth - 100;
+            const maxHeight = window.innerHeight - 100;
+
+            const randomLeft = Math.random() * maxWidth;
+            const randomTop = Math.random() * maxHeight;
+
+            drone.style.left = `${randomLeft}px`;
+            drone.style.top = `${randomTop}px`;
+        }
+
+        setInterval(moveDroneRandomly, 1000);
+        setInterval(dropFlower, 1000);
+        const drone1 = document.getElementById('drone-container-1');
+        const drone2 = document.getElementById('drone-container-2');
+
+        function dropFlower(drone) {
+            const flower = document.createElement('img');
+            flower.src = 'flower.png';
+            flower.classList.add('flower');
+            flower.style.left = (drone.offsetLeft + 40) + 'px';
+            flower.style.top = (drone.offsetTop + 40) + 'px';
+            document.body.appendChild(flower);
+            setTimeout(() => flower.remove(), 5000);
+        }
+
+        function moveDroneRandomly(drone) {
+            const maxWidth = window.innerWidth - 100;
+            const maxHeight = window.innerHeight - 100;
+            const randomLeft = Math.random() * maxWidth;
+            const randomTop = Math.random() * maxHeight;
+            drone.style.left = `${randomLeft}px`;
+            drone.style.top = `${randomTop}px`;
+        }
+
+        setInterval(() => {
+            moveDroneRandomly(drone1);
+            moveDroneRandomly(drone2);
+        }, 1000);
+
+        setInterval(() => {
+            dropFlower(drone1);
+            dropFlower(drone2);
+        }, 1000);
+
+
+    </script>
+</body>
+
+</html>
